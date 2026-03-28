@@ -1,0 +1,16 @@
+{
+  "uuid": "xtre-0001-coche-2025",
+  "name": "Coche",
+  "description": "Coche W, color negro",
+  "dimensions": "80cm x 80cm",
+  "materials": "Lana acrílica",
+  "destino": "Alfombra de suelo",
+  "edition": "Encargo personalizado",
+  "date": "Marzo 2026",
+  "images": [
+    "/images/xtre-0001-coche-2025/1.jpg",
+    "/images/xtre-0001-coche-2025/2.jpg",
+    "/images/xtre-0001-coche-2025/3.jpg",
+    "/images/xtre-0001-coche-2025/4.jpg"
+  ]
+}

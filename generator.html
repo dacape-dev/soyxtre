@@ -354,7 +354,7 @@ footer{
   </div>
   <div class="header-right">
     <h1>Generador de Certificados</h1>
-    <p>Herramienta local · Sin servidor · Sin cuenta</p>
+    <p>Herramienta local · GitHub Pages · Rutas relativas</p>
   </div>
 </header>
 
@@ -366,8 +366,8 @@ footer{
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3"/></svg>
       URL base de tus certificados
     </label>
-    <input type="text" id="base-url" value="https://soyxtre.web.app/cert"
-      placeholder="https://tu-dominio.web.app/cert">
+    <input type="text" id="base-url" value="https://dacape-dev.github.io/soyxtre"
+      placeholder="https://dacape-dev.github.io/soyxtre">
     <div class="url-preview-box" id="url-preview">
       <span>Genera un certificado para ver la URL completa</span>
     </div>
@@ -519,9 +519,8 @@ footer{
     + Añadir imagen del proceso
   </button>
   <p class="img-help">
-    Sube las fotos a <a href="https://imgbb.com" target="_blank">ImgBB</a>,
-    <a href="https://cloudinary.com" target="_blank">Cloudinary</a> o Firebase Storage
-    y pega aquí la URL directa.<br>
+    Usa rutas relativas desde la raíz del repo.<br>
+    Estructura recomendada: <code style="color:rgba(196,144,90,.8);font-style:normal;">images/{uuid}/principal.jpg</code><br>
     La <strong style="color:rgba(245,240,232,.7)">primera imagen</strong> aparece en el certificado.
     Las demás forman la galería del proceso.
   </p>
@@ -636,7 +635,7 @@ function refreshURLPreview() {
   var uuid = document.getElementById('f-uuid').value.trim();
   var el   = document.getElementById('url-preview');
   if (uuid) {
-    el.innerHTML = base + '/' + '<strong style="color:var(--accent)">' + uuid + '</strong>';
+    el.innerHTML = base + '<strong style="color:var(--accent)">?id=' + uuid + '</strong>';
   } else {
     el.innerHTML = '<span>Introduce un UUID para ver la URL</span>';
   }
@@ -693,8 +692,8 @@ function addImgRow(isMain) {
     : '<button class="btn-rem-img" title="Quitar">✕</button>';
 
   row.innerHTML = badge +
-    '<input type="url" placeholder="' +
-    (isMain ? 'URL imagen principal · aparece en el certificado' : 'URL imagen proceso') +
+    '<input type="text" placeholder="' +
+    (isMain ? 'images/xtre-0001/principal.jpg' : 'images/xtre-0001/proceso-1.jpg') +
     '">' + removeBtn;
 
   if (!isMain) {
@@ -741,9 +740,9 @@ function generate() {
 
   // URL preview
   var base    = document.getElementById('base-url').value.trim().replace(/\/+$/, '');
-  var certURL = base + '/' + uuid;
+  var certURL = base + '?id=' + uuid;
   document.getElementById('url-preview').innerHTML =
-    base + '/' + '<strong style="color:var(--accent)">' + uuid + '</strong>';
+    base + '<strong style="color:var(--accent)">?id=' + uuid + '</strong>';
 
   // QR
   document.getElementById('qr-name').textContent = name;
@@ -802,7 +801,7 @@ function downloadQR() {
   var uuid = state.uuid;
   var name = state.json.name;
   var base = document.getElementById('base-url').value.trim().replace(/\/+$/, '');
-  var url  = base + '/' + uuid;
+  var url  = base + '?id=' + uuid;
 
   var out = document.createElement('canvas');
   out.width  = 560;
