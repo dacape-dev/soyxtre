@@ -93,9 +93,11 @@ body::before{
 }
 .topbar-logo img{
   height:120px;
-  /* Fondo oscuro → invertir para que salga crema/blanco */
-  filter: invert(1) brightness(0.92);
   display:block;
+  /* invert: ink→cream on dark bg; circle (white px)→black→invisible on dark bg */
+  filter: invert(1) brightness(0.9);
+  /* clip the outer ring where the dashed circle lives */
+  clip-path: circle(42% at 50% 50%);
 }
 .topbar-pill{
   font-family:'DM Mono',monospace;font-size:.55rem;
@@ -292,8 +294,8 @@ body::before{
 }
 .footer-logo-img{
   height:100px;width:auto;display:block;margin:0 auto;
-  /* Fondo oscuro → invertir para que salga crema */
-  filter: invert(1) brightness(0.88);
+  filter: invert(1) brightness(0.9);
+  clip-path: circle(42% at 50% 50%);
 }
 .page-footer-sub{
   font-family:'DM Mono',monospace;font-size:.52rem;
