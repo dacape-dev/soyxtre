@@ -366,8 +366,8 @@ footer{
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3"/></svg>
       URL base de tus certificados
     </label>
-    <input type="text" id="base-url" value="https://dacape-dev.github.io/soyxtre"
-      placeholder="https://dacape-dev.github.io/soyxtre">
+    <input type="text" id="base-url" value="https://dacape-dev.github.io/soyxtre/certs"
+      placeholder="https://dacape-dev.github.io/soyxtre/certs">
     <div class="url-preview-box" id="url-preview">
       <span>Genera un certificado para ver la URL completa</span>
     </div>
@@ -520,7 +520,7 @@ footer{
   </button>
   <p class="img-help">
     Usa rutas relativas desde la raíz del repo.<br>
-    Estructura recomendada: <code style="color:rgba(196,144,90,.8);font-style:normal;">images/{uuid}/principal.jpg</code><br>
+    Estructura recomendada: <code style="color:rgba(196,144,90,.8);font-style:normal;">certs/images/{uuid}/1.png</code><br>
     La <strong style="color:rgba(245,240,232,.7)">primera imagen</strong> aparece en el certificado.
     Las demás forman la galería del proceso.
   </p>
@@ -635,7 +635,7 @@ function refreshURLPreview() {
   var uuid = document.getElementById('f-uuid').value.trim();
   var el   = document.getElementById('url-preview');
   if (uuid) {
-    el.innerHTML = base + '<strong style="color:var(--accent)">?id=' + uuid + '</strong>';
+    el.innerHTML = base + '<strong style="color:var(--accent)">/' + uuid + '</strong>';
   } else {
     el.innerHTML = '<span>Introduce un UUID para ver la URL</span>';
   }
@@ -693,7 +693,7 @@ function addImgRow(isMain) {
 
   row.innerHTML = badge +
     '<input type="text" placeholder="' +
-    (isMain ? 'images/xtre-0001/principal.jpg' : 'images/xtre-0001/proceso-1.jpg') +
+    (isMain ? 'certs/images/XTRE-ABCD/1.png' : 'images/xtre-0001/proceso-1.jpg') +
     '">' + removeBtn;
 
   if (!isMain) {
@@ -740,9 +740,9 @@ function generate() {
 
   // URL preview
   var base    = document.getElementById('base-url').value.trim().replace(/\/+$/, '');
-  var certURL = base + '?id=' + uuid;
+  var certURL = base + '/' + uuid;
   document.getElementById('url-preview').innerHTML =
-    base + '<strong style="color:var(--accent)">?id=' + uuid + '</strong>';
+    base + '<strong style="color:var(--accent)">/' + uuid + '</strong>';
 
   // QR
   document.getElementById('qr-name').textContent = name;
@@ -801,7 +801,7 @@ function downloadQR() {
   var uuid = state.uuid;
   var name = state.json.name;
   var base = document.getElementById('base-url').value.trim().replace(/\/+$/, '');
-  var url  = base + '?id=' + uuid;
+  var url  = base + '/' + uuid;
 
   var out = document.createElement('canvas');
   out.width  = 560;

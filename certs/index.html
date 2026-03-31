@@ -482,9 +482,17 @@ body::before{
 
 <script>
 (function(){
-  // ── Routing: dacape-dev.github.io/soyxtre/?id=UUID ────────────────────────
+  // ── Routing: dacape-dev.github.io/soyxtre/certs/UUID ──────────────────────
+  // /certs/index.html is served for /certs/ but 404.html redirects /certs/UUID here.
+  // UUID is the last non-empty path segment.
   function getUUID(){
-    return new URLSearchParams(location.search).get('id') || '';
+    // Primary: last path segment  e.g. /soyxtre/certs/XTRE-123 → XTRE-123
+    var parts = window.location.pathname.split('/').filter(Boolean);
+    var last  = parts[parts.length - 1];
+    // 'index' or 'certs' means we're at /certs/ with no UUID
+    if(last && last !== 'index' && last !== 'certs') return last;
+    // Fallback: ?id= param (for local testing)
+    return new URLSearchParams(window.location.search).get('id') || '';
   }
 
   const uuid = getUUID();
@@ -497,10 +505,11 @@ body::before{
     return;
   }
 
+  document.getElementById('pill-id').textContent = '#' + uuid.toUpperCase();
   document.getElementById('err-id-label').textContent = uuid.toUpperCase();
 
   // ── Fetch JSON ────────────────────────────────────────────────────────────
-  // Tries: /json/{uuid}.json  (works when served from the same origin)
+  // Tries: /certs/{uuid}.json  (works when served from the same origin)
   fetch('./json/' + uuid + '.json')
     .then(r => { if(!r.ok) throw new Error(r.status); return r.json(); })
     .then(render)

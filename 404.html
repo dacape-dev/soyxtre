@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>soyXtre</title>
+<script>
+(function() {
+  // GitHub Pages: /certs/UUID → no file → 404
+  // We detect if we're in a cert path and redirect to /certs/?id=UUID
+  // certs/index.html then reads the UUID from the ?id param OR path
+  var path   = window.location.pathname;
+  var origin = window.location.origin;
+
+  // Match /something/certs/UUID  (with any repo base)
+  var m = path.match(/^(.*\/certs)\/([^\/]+)\/?$/);
+  if(m) {
+    var base = m[1]; // e.g. /soyxtre/certs
+    var uuid = m[2]; // e.g. XTRE-YMD5-MNDN7FDC
+    // Redirect to /certs/ with id param — index.html loads and reads it
+    window.location.replace(origin + base + '/?id=' + uuid);
+    return;
+  }
+
+  // Not a cert URL — go home
+  var repoBase = path.split('/').slice(0,2).join('/'); // e.g. /soyxtre
+  window.location.replace(origin + repoBase + '/');
+})();
+</script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:#1a1209;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+  p{font-family:monospace;font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(196,144,90,.4);}
+</style>
+</head>
+<body><p>Verificando certificado…</p></body>
+</html>
