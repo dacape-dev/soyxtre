@@ -1,14 +1,17 @@
 {
-  "uuid": "XTRE-MQRH-MNGJ0TSI",
-  "name": "Demonio Oni",
-  "description": "Diseño único inspirado en la figura del demonio Oni japonés, símbolo de fuerza, carácter y energía. Cada detalle está trabajado para transmitir esa presencia intensa y casi salvaje que define a este personaje.\n\nNo hay otra igual: es una pieza creada desde cero, pensada para destacar y convertirse en el centro de cualquier espacio.",
-  "dimensions": "80cm x 60cm",
+  "uuid": "XTRE-YMD5-MNDN7FDC",
+  "name": "Estela & Nala",
+  "description": "Una alfombra totalmente personalizada, creada como un regalo sorpresa lleno de significado: la conexión entre Estela y Nala. El diseño muestra una ilustración tierna y detallada de ambas, transmitiendo complicidad y alegría. Cada elemento está cuidado al detalle, desde las expresiones hasta los colores y el acabado en relieve, que le aporta textura y calidez. Una alfombra hecha a mano que guarda una historia detrás y que está destinada a convertirse en un recuerdo para siempre.",
+  "dimensions": "80cm x 70cm",
   "materials": "Lana acrílica",
-  "destino": "Alfombra de pared",
-  "edition": "Colección Japan",
-  "date": "Enero 2026",
-  "images": ["/certs/images/XTRE-MQRH-MNGJ0TSI/1.png",
-    "/certs/images/XTRE-MQRH-MNGJ0TSI/2.png",
-    "/certs/images/XTRE-MQRH-MNGJ0TSI/3.png",
-    "/certs/images/XTRE-MQRH-MNGJ0TSI/4.png"
+  "destino": "Alfombra de suelo",
+  "edition": "Encargo personalizado",
+  "date": "Marzo 2026",
+  "images": [
+    "/certs/images/XTRE-YMD5-MNDN7FDC/1.png",
+    "/certs/images/XTRE-YMD5-MNDN7FDC/2.png",
+    "/certs/images/XTRE-YMD5-MNDN7FDC/3.png",
+    "/certs/images/XTRE-YMD5-MNDN7FDC/4.png",
+    "/certs/images/XTRE-YMD5-MNDN7FDC/5.png"
+  ]
 }
