@@ -34,9 +34,10 @@ body{
   border-bottom:1px solid rgba(196,144,90,0.12);
 }
 .nav-logo img{
-  height:40px;display:block;
+  height:300px;display:block;margin:0 auto;
   filter:invert(1) brightness(0.9);
   clip-path:circle(42% at 50% 50%);
+  animation:fadeDown .9s .1s ease both;
 }
 .nav-links{display:flex;align-items:center;gap:28px;}
 .nav-links a{
@@ -218,11 +219,11 @@ body{
 .footer-brand{
   display:flex;align-items:center;
 }
-.footer-logo-img{
-  height:48px;width:auto;display:block;
-  /* ink on dark bg: invert to cream, clip removes dashed circle */
-  filter:invert(1) brightness(0.88);
+.footer-brand img{
+  height:300px;display:block;margin:0 auto;
+  filter:invert(1) brightness(0.9);
   clip-path:circle(42% at 50% 50%);
+  animation:fadeDown .9s .1s ease both;
 }
 .footer-links{display:flex;gap:20px;}
 .footer-links a{

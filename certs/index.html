@@ -95,9 +95,10 @@ body::before{
   border-bottom:1px solid rgba(196,144,90,0.12);
 }
 .nav-logo img{
-  height:40px;display:block;
+  height:300px;display:block;margin:0 auto;
   filter:invert(1) brightness(0.9);
   clip-path:circle(42% at 50% 50%);
+  animation:fadeDown .9s .1s ease both;
 }
 .nav-links{display:flex;align-items:center;gap:28px;}
 .nav-links a{
@@ -351,10 +352,11 @@ body::before{
   text-align:center;padding:48px 0 20px;
   position:relative;z-index:1;
 }
-.footer-logo-img{
-  height:100px;width:auto;display:block;margin:0 auto;
-  filter: invert(1) brightness(0.9);
-  clip-path: circle(42% at 50% 50%);
+.footer-brand img{
+  height:300px;display:block;margin:0 auto;
+  filter:invert(1) brightness(0.9);
+  clip-path:circle(42% at 50% 50%);
+  animation:fadeDown .9s .1s ease both;
 }
 .page-footer-sub{
   font-family:'DM Mono',monospace;font-size:.52rem;
