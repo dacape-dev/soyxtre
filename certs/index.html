@@ -295,6 +295,39 @@ body::before{
 }
 </style>
 <link rel="stylesheet" href="../styles.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+async function exportPDF() {
+  const target = document.getElementById('main');
+  
+  // Ocultar galería temporalmente del PDF
+  const gallery = document.getElementById('gallery-section');
+  const btn = document.querySelector('.btn-pdf');
+  const prevGallery = gallery.style.display;
+  gallery.style.display = 'none';
+  btn.style.display = 'none';
+
+  const canvas = await html2canvas(target, { 
+    scale: 2,
+    useCORS: true,
+    backgroundColor: '#1a1209'
+  });
+
+  // Restaurar
+  gallery.style.display = prevGallery;
+  btn.style.display = '';
+
+  const img = canvas.toDataURL('image/png');
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const w = pdf.internal.pageSize.getWidth();
+  const h = (canvas.height * w) / canvas.width;
+  pdf.addImage(img, 'PNG', 0, 0, w, h);
+  pdf.save('certificado-soyxtre.pdf');
+}
+</script>
 </head>
 <body>
 
@@ -433,9 +466,12 @@ body::before{
         <div class="seal-line-2">Pieza verificada y registrada</div>
       </div>
     </div>
+    <div style="text-align:center; margin-top:24px;">
+      <button onclick="exportPDF()" class="btn-pdf">
+        ↓ Descargar certificado en PDF
+      </button>
+    </div>
   </div>
-
-  <button onclick="exportPDF()">Descargar PDF</button>
 
   <!-- Gallery -->
   <div class="gallery-section" id="gallery-section" style="display:none">
@@ -453,8 +489,6 @@ body::before{
   <button id="lb-next">&#8594;</button>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (function(){
   // ── Routing: dacape-dev.github.io/soyxtre/certs/UUID ──────────────────────
@@ -582,20 +616,6 @@ body::before{
     fadeOut(loading);
     document.getElementById('err-404').classList.add('show');
   }
-
-  async function exportPDF() {
-    const card = document.querySelector('.card');
-    const canvas = await html2canvas(card, { scale: 2 });
-    const img = canvas.toDataURL('image/png');
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    const w = pdf.internal.pageSize.getWidth();
-    const h = (canvas.height * w) / canvas.width;
-    pdf.addImage(img, 'PNG', 0, 0, w, h);
-    pdf.save('certificado.pdf');
-  }
-  
 })();
 </script>
 <script src="../script.js"></script>
