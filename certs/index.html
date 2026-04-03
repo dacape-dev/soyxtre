@@ -300,31 +300,63 @@ body::before{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 async function exportPDF() {
-  const target = document.getElementById('main');
-  
-  // Ocultar galería temporalmente del PDF
-  const gallery = document.getElementById('gallery-section');
   const btn = document.querySelector('.btn-pdf');
+  const gallery = document.getElementById('gallery-section');
+  const nav = document.querySelector('.site-nav');
+
+  // Ocultar elementos no deseados
+  btn.style.display = 'none';
   const prevGallery = gallery.style.display;
   gallery.style.display = 'none';
-  btn.style.display = 'none';
+  if(nav) nav.style.display = 'none';
 
-  const canvas = await html2canvas(target, { 
+  // Esperar a que todas las imágenes estén cargadas
+  const imgs = document.getElementById('main').querySelectorAll('img');
+  await Promise.all([...imgs].map(img =>
+    img.complete ? Promise.resolve() :
+    new Promise(res => { img.onload = res; img.onerror = res; })
+  ));
+
+  const target = document.getElementById('main');
+  const canvas = await html2canvas(target, {
     scale: 2,
     useCORS: true,
-    backgroundColor: '#1a1209'
+    allowTaint: false,
+    backgroundColor: '#1a1209',
+    scrollY: -window.scrollY,
+    windowWidth: target.scrollWidth,
+    windowHeight: target.scrollHeight,
   });
 
   // Restaurar
-  gallery.style.display = prevGallery;
   btn.style.display = '';
+  gallery.style.display = prevGallery;
+  if(nav) nav.style.display = '';
 
-  const img = canvas.toDataURL('image/png');
+  const imgData = canvas.toDataURL('image/png');
   const { jsPDF } = window.jspdf;
+
+  // A4 en mm: 210 x 297
+  const pageW = 210;
+  const pageH = 297;
+  const imgW = pageW;
+  const imgH = (canvas.height * pageW) / canvas.width;
+
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const w = pdf.internal.pageSize.getWidth();
-  const h = (canvas.height * w) / canvas.width;
-  pdf.addImage(img, 'PNG', 0, 0, w, h);
+
+  if(imgH <= pageH) {
+    // Cabe en una página
+    pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH);
+  } else {
+    // Múltiples páginas si es muy largo
+    let yOffset = 0;
+    while(yOffset < imgH) {
+      if(yOffset > 0) pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, -yOffset, imgW, imgH);
+      yOffset += pageH;
+    }
+  }
+
   pdf.save('certificado-soyxtre.pdf');
 }
 </script>
