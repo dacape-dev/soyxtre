@@ -435,13 +435,13 @@ body::before{
     </div>
   </div>
 
+  <button onclick="exportPDF()">Descargar PDF</button>
+
   <!-- Gallery -->
   <div class="gallery-section" id="gallery-section" style="display:none">
     <div class="gallery-head">Proceso de creación</div>
     <div class="gallery-grid" id="gallery"></div>
   </div>
-
-  <button onclick="exportPDF()">Descargar PDF</button>
 
 </div>
 
@@ -584,7 +584,7 @@ body::before{
   }
 
   async function exportPDF() {
-    const card = document.querySelector('.mi-card');
+    const card = document.querySelector('.card');
     const canvas = await html2canvas(card, { scale: 2 });
     const img = canvas.toDataURL('image/png');
 
@@ -593,7 +593,7 @@ body::before{
     const w = pdf.internal.pageSize.getWidth();
     const h = (canvas.height * w) / canvas.width;
     pdf.addImage(img, 'PNG', 0, 0, w, h);
-    pdf.save('card.pdf');
+    pdf.save('certificado.pdf');
   }
   
 })();
