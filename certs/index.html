@@ -275,6 +275,24 @@ body::before{
 }
 #lb-prev:hover,#lb-next:hover{color:var(--cream);border-color:rgba(212,201,176,.4);}
 #lb-prev{left:16px;}#lb-next{right:16px;}
+
+.btn-pdf {
+  background: none;
+  border: 1px solid rgba(196,144,90,0.3);
+  color: var(--accent);
+  font-family: 'DM Mono', monospace;
+  font-size: .58rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+}
+.btn-pdf:hover {
+  background: rgba(196,144,90,0.1);
+  border-color: rgba(196,144,90,0.6);
+}
 </style>
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -422,6 +440,9 @@ body::before{
     <div class="gallery-head">Proceso de creación</div>
     <div class="gallery-grid" id="gallery"></div>
   </div>
+
+  <button onclick="exportPDF()">Descargar PDF</button>
+
 </div>
 
 <!-- Lightbox -->
@@ -432,6 +453,8 @@ body::before{
   <button id="lb-next">&#8594;</button>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (function(){
   // ── Routing: dacape-dev.github.io/soyxtre/certs/UUID ──────────────────────
@@ -559,8 +582,23 @@ body::before{
     fadeOut(loading);
     document.getElementById('err-404').classList.add('show');
   }
+
+  async function exportPDF() {
+    const card = document.querySelector('.mi-card');
+    const canvas = await html2canvas(card, { scale: 2 });
+    const img = canvas.toDataURL('image/png');
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF();
+    const w = pdf.internal.pageSize.getWidth();
+    const h = (canvas.height * w) / canvas.width;
+    pdf.addImage(img, 'PNG', 0, 0, w, h);
+    pdf.save('card.pdf');
+  }
+  
 })();
 </script>
 <script src="../script.js"></script>
+
 </body>
 </html>
