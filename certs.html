@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
 <title>Colección · soyXtre</title>
 <style>
 
@@ -23,51 +24,6 @@ body{
   font-family:'Cormorant Garamond',serif;
   overflow-x:hidden;
 }
-
-
-.site-nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 40px;height:64px;
-  background:rgba(26,18,9,0.92);
-  backdrop-filter:blur(12px);
-  border-bottom:1px solid rgba(196,144,90,0.12);
-}
-.nav-logo img{
-  height:150px;display:block;
-  filter:invert(1) brightness(0.9);
-  clip-path:circle(42% at 50% 50%);
-}
-.nav-links{display:flex;align-items:center;gap:28px;}
-.nav-links a{
-  font-family:'DM Mono',monospace;font-size:.6rem;
-  letter-spacing:.18em;text-transform:uppercase;
-  color:var(--muted);text-decoration:none;
-  transition:color .2s;
-}
-.nav-links a:hover,.nav-links a.active{color:var(--cream);}
-.nav-links a.active{position:relative;}
-.nav-links a.active::after{
-  content:'';position:absolute;bottom:-2px;left:0;right:0;
-  height:1px;background:var(--accent);
-}
-.nav-etsy{
-  display:flex;align-items:center;gap:7px;
-  font-family:'DM Mono',monospace;font-size:.58rem;
-  letter-spacing:.14em;text-transform:uppercase;
-  color:var(--accent);text-decoration:none;
-  border:1px solid rgba(196,144,90,0.3);
-  border-radius:2px;padding:7px 14px;
-  transition:background .2s,border-color .2s;
-}
-.nav-etsy:hover{background:rgba(196,144,90,0.1);border-color:rgba(196,144,90,0.6);}
-.nav-etsy svg{width:14px;height:14px;stroke:var(--accent);}
-@media(max-width:640px){
-  .site-nav{padding:0 20px;}
-  .nav-links{gap:16px;}
-  .nav-etsy span{display:none;}
-}
-
 
 .page-top{
   padding:120px 40px 60px;
@@ -205,33 +161,6 @@ body{
   color:var(--accent);background:rgba(196,144,90,.1);
   padding:1px 6px;border-radius:1px;
 }
-
-/* ── FOOTER ── */
-.site-footer{
-  background:var(--ink);padding:48px 40px 32px;
-  border-top:1px solid rgba(212,201,176,.08);
-}
-.footer-inner{
-  max-width:1000px;margin:0 auto;
-  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;
-}
-.footer-brand{
-  display:flex;align-items:center;
-}
-.footer-brand img{
-  height:300px;display:block;margin:0 auto;
-  filter:invert(1) brightness(0.9);
-  clip-path:circle(42% at 50% 50%);
-  animation:fadeDown .9s .1s ease both;
-}
-.footer-links{display:flex;gap:20px;}
-.footer-links a{
-  font-family:'DM Mono',monospace;font-size:.55rem;
-  letter-spacing:.14em;text-transform:uppercase;
-  color:rgba(122,111,94,.5);text-decoration:none;
-  transition:color .2s;
-}
-.footer-links a:hover{color:var(--muted);}
 </style>
 </head>
 <body>
