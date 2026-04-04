@@ -293,6 +293,9 @@ body::before{
   background: rgba(196,144,90,0.1);
   border-color: rgba(196,144,90,0.6);
 }
+@media (max-width: 768px) {
+  .btn-pdf { display: none; }
+}
 </style>
 <link rel="stylesheet" href="../styles.css">
 
@@ -304,138 +307,102 @@ async function exportPDF() {
   const gallery = document.getElementById('gallery-section');
   const nav = document.querySelector('.site-nav');
 
-  btn.textContent = 'Generando...';
-  btn.disabled = true;
+  btn.style.display = 'none';
   const prevGallery = gallery.style.display;
   gallery.style.display = 'none';
   if(nav) nav.style.display = 'none';
 
-  try {
-    const heroImg  = document.getElementById('hero-img');
-    const heroWrap = document.querySelector('.hero-wrap');
-    const scale    = 2;
-    const heroW    = heroWrap.offsetWidth  * scale;
-    const heroH    = heroWrap.offsetHeight * scale;
+  // Esperar imágenes
+  const imgs = document.getElementById('main').querySelectorAll('img');
+  await Promise.all([...imgs].map(img =>
+    img.complete ? Promise.resolve() :
+    new Promise(res => { img.onload = res; img.onerror = res; })
+  ));
 
-    btn.textContent = 'Cargando imagen...';
+  // 1. Capturar el hero manualmente (respetando object-fit: cover)
+  const heroWrap = document.querySelector('.hero-wrap');
+  const heroImg  = document.getElementById('hero-img');
+  const heroW    = heroWrap.offsetWidth;
+  const heroH    = heroWrap.offsetHeight;
+  const scale    = 2;
 
-    let heroBitmap;
-    try {
-      const resp = await fetch(heroImg.src);
-      const blob = await resp.blob();
-      heroBitmap = await createImageBitmap(blob);
-    } catch(e) {
-      heroBitmap = heroImg;
-    }
+  const heroCanvas = document.createElement('canvas');
+  heroCanvas.width  = heroW * scale;
+  heroCanvas.height = heroH * scale;
+  const hCtx = heroCanvas.getContext('2d');
 
-    btn.textContent = 'Dibujando hero...';
+  // Fondo oscuro
+  hCtx.fillStyle = 'rgba(196,144,90,0.07)';
+  hCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
 
-    const heroCanvas = document.createElement('canvas');
-    heroCanvas.width  = heroW;
-    heroCanvas.height = heroH;
-    const hCtx = heroCanvas.getContext('2d');
+  // Dibujar con object-fit: cover
+  const iw = heroImg.naturalWidth;
+  const ih = heroImg.naturalHeight;
+  const cw = heroCanvas.width;
+  const ch = heroCanvas.height;
+  const ratio = Math.max(cw / iw, ch / ih);
+  const dw = iw * ratio;
+  const dh = ih * ratio;
+  const dx = (cw - dw) / 2;
+  const dy = (ch - dh) / 2;
+  hCtx.drawImage(heroImg, dx, dy, dw, dh);
 
-    hCtx.fillStyle = '#1a1209';
-    hCtx.fillRect(0, 0, heroW, heroH);
+  // Gradiente overlay (igual que ::after)
+  const grad = hCtx.createLinearGradient(0, ch * 0.45, 0, ch);
+  grad.addColorStop(0, 'rgba(26,18,9,0)');
+  grad.addColorStop(1, 'rgba(26,18,9,0.75)');
+  hCtx.fillStyle = grad;
+  hCtx.fillRect(0, 0, cw, ch);
 
-    const iw = heroBitmap.width  || heroBitmap.naturalWidth;
-    const ih = heroBitmap.height || heroBitmap.naturalHeight;
-    if(iw && ih) {
-      const ratio = Math.max(heroW / iw, heroH / ih);
-      const dw = iw * ratio;
-      const dh = ih * ratio;
-      const dx = (heroW - dw) / 2;
-      const dy = (heroH - dh) / 2;
-      hCtx.drawImage(heroBitmap, dx, dy, dw, dh);
-    }
-
-    const grad = hCtx.createLinearGradient(0, heroH * 0.45, 0, heroH);
-    grad.addColorStop(0, 'rgba(26,18,9,0)');
-    grad.addColorStop(1, 'rgba(26,18,9,0.75)');
-    hCtx.fillStyle = grad;
-    hCtx.fillRect(0, 0, heroW, heroH);
-
-  btn.textContent = 'Capturando certificado...';
-
+  // 2. Capturar la card con html2canvas
   const card = document.querySelector('.card');
-  const cardCanvas = await Promise.race([
-    html2canvas(card, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#f5f0e8',
-      logging: false,
-      ignoreElements: el => el.tagName === 'svg', // ignora SVGs problemáticos
-      onclone: doc => {
-        // Forzar fuentes a sistema por si Google Fonts falla
-        const style = doc.createElement('style');
-        style.textContent = `
-          * { font-family: Georgia, serif !important; }
-          .spec-k, .uuid-k, .uuid-v, .cert-eyebrow,
-          .seal-line-2, .seal-sub { font-family: monospace !important; }
-        `;
-        doc.head.appendChild(style);
-      }
-    }),
-    // Timeout de 10s para no quedarse colgado
-    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000))
-  ]);
+  const cardCanvas = await html2canvas(card, {
+    scale: 2,
+    useCORS: true,
+    allowTaint: false,
+    backgroundColor: '#f5f0e8',
+  });
 
-    btn.textContent = 'Generando PDF...';
+  // 3. Combinar hero + card en un canvas final
+  const totalH = heroCanvas.height + cardCanvas.height;
+  const finalCanvas = document.createElement('canvas');
+  finalCanvas.width  = heroCanvas.width;
+  finalCanvas.height = totalH;
+  const fCtx = finalCanvas.getContext('2d');
 
-    const finalCanvas = document.createElement('canvas');
-    finalCanvas.width  = heroCanvas.width;
-    finalCanvas.height = heroCanvas.height + cardCanvas.height;
-    const fCtx = finalCanvas.getContext('2d');
-    fCtx.fillStyle = '#1a1209';
-    fCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-    fCtx.drawImage(heroCanvas, 0, 0);
-    fCtx.drawImage(cardCanvas, 0, heroCanvas.height);
+  fCtx.fillStyle = '#1a1209';
+  fCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+  fCtx.drawImage(heroCanvas,  0, 0);
+  fCtx.drawImage(cardCanvas,  0, heroCanvas.height);
 
-    const imgData = finalCanvas.toDataURL('image/png');
-    const { jsPDF } = window.jspdf;
-    const pageW = 210, pageH = 297;
-    const imgW  = pageW;
-    const imgH  = (finalCanvas.height * pageW) / finalCanvas.width;
+  // Restaurar
+  btn.style.display = '';
+  gallery.style.display = prevGallery;
+  if(nav) nav.style.display = '';
 
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    if(imgH <= pageH) {
-      pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH);
-    } else {
-      let yOffset = 0;
-      while(yOffset < imgH) {
-        if(yOffset > 0) pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, -yOffset, imgW, imgH);
-        yOffset += pageH;
-      }
+  // 4. Generar PDF
+  const imgData = finalCanvas.toDataURL('image/png');
+  const { jsPDF } = window.jspdf;
+
+  const pageW = 210;
+  const pageH = 297;
+  const imgW  = pageW;
+  const imgH  = (finalCanvas.height * pageW) / finalCanvas.width;
+
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  if(imgH <= pageH) {
+    pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH);
+  } else {
+    let yOffset = 0;
+    while(yOffset < imgH) {
+      if(yOffset > 0) pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, -yOffset, imgW, imgH);
+      yOffset += pageH;
     }
-
-    btn.textContent = 'Descargando...';
-
-    const pdfBlob = pdf.output('blob');
-    const pdfUrl  = URL.createObjectURL(pdfBlob);
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-    if(isIOS) {
-      window.location.href = pdfUrl;
-    } else {
-      const a = document.createElement('a');
-      a.href = pdfUrl;
-      a.download = 'certificado-soyxtre.pdf';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
-    }
-
-  } catch(err) {
-    alert('Error: ' + err.message);
-  } finally {
-    btn.textContent = '↓ Descargar certificado en PDF';
-    btn.disabled = false;
-    gallery.style.display = prevGallery;
-    if(nav) nav.style.display = '';
   }
+
+  pdf.save('certificado-soyxtre.pdf');
 }
 </script>
 </head>
