@@ -355,16 +355,31 @@ async function exportPDF() {
     hCtx.fillStyle = grad;
     hCtx.fillRect(0, 0, heroW, heroH);
 
-    btn.textContent = 'Capturando certificado...';
+  btn.textContent = 'Capturando certificado...';
 
-    const card = document.querySelector('.card');
-    const cardCanvas = await html2canvas(card, {
+  const card = document.querySelector('.card');
+  const cardCanvas = await Promise.race([
+    html2canvas(card, {
       scale: 2,
       useCORS: true,
       allowTaint: true,
       backgroundColor: '#f5f0e8',
       logging: false,
-    });
+      ignoreElements: el => el.tagName === 'svg', // ignora SVGs problemáticos
+      onclone: doc => {
+        // Forzar fuentes a sistema por si Google Fonts falla
+        const style = doc.createElement('style');
+        style.textContent = `
+          * { font-family: Georgia, serif !important; }
+          .spec-k, .uuid-k, .uuid-v, .cert-eyebrow,
+          .seal-line-2, .seal-sub { font-family: monospace !important; }
+        `;
+        doc.head.appendChild(style);
+      }
+    }),
+    // Timeout de 10s para no quedarse colgado
+    new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 10000))
+  ]);
 
     btn.textContent = 'Generando PDF...';
 
