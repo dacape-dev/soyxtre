@@ -304,7 +304,8 @@ async function exportPDF() {
   const gallery = document.getElementById('gallery-section');
   const nav = document.querySelector('.site-nav');
 
-  btn.style.display = 'none';
+  btn.textContent = 'Generando...';
+  btn.disabled = true;
   const prevGallery = gallery.style.display;
   gallery.style.display = 'none';
   if(nav) nav.style.display = 'none';
@@ -316,18 +317,17 @@ async function exportPDF() {
     const heroW    = heroWrap.offsetWidth  * scale;
     const heroH    = heroWrap.offsetHeight * scale;
 
-    // Cargar imagen via fetch → blob → ImageBitmap (evita CORS en Safari)
+    // Cargar imagen via fetch → blob (evita CORS en Safari)
     let heroBitmap;
     try {
       const resp = await fetch(heroImg.src);
       const blob = await resp.blob();
       heroBitmap = await createImageBitmap(blob);
     } catch(e) {
-      // Fallback: usar el elemento img directamente
       heroBitmap = heroImg;
     }
 
-    // Canvas del hero con object-fit: cover manual
+    // Hero canvas con object-fit: cover manual
     const heroCanvas = document.createElement('canvas');
     heroCanvas.width  = heroW;
     heroCanvas.height = heroH;
@@ -359,12 +359,12 @@ async function exportPDF() {
     const cardCanvas = await html2canvas(card, {
       scale: 2,
       useCORS: true,
-      allowTaint: true,   // necesario en Safari
+      allowTaint: true,
       backgroundColor: '#f5f0e8',
       logging: false,
     });
 
-    // Canvas final
+    // Canvas final combinado
     const finalCanvas = document.createElement('canvas');
     finalCanvas.width  = heroCanvas.width;
     finalCanvas.height = heroCanvas.height + cardCanvas.height;
@@ -374,6 +374,7 @@ async function exportPDF() {
     fCtx.drawImage(heroCanvas, 0, 0);
     fCtx.drawImage(cardCanvas, 0, heroCanvas.height);
 
+    // Generar PDF
     const imgData = finalCanvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
     const pageW = 210, pageH = 297;
@@ -392,10 +393,31 @@ async function exportPDF() {
       }
     }
 
-    pdf.save('certificado-soyxtre.pdf');
+    // Descarga compatible con todos los navegadores
+    const pdfBlob = pdf.output('blob');
+    const pdfUrl  = URL.createObjectURL(pdfBlob);
 
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+    if(isIOS) {
+      // iOS no soporta download en blobs — abrir en visor nativo
+      window.location.href = pdfUrl;
+    } else {
+      const a = document.createElement('a');
+      a.href = pdfUrl;
+      a.download = 'certificado-soyxtre.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(pdfUrl), 1000);
+    }
+
+  } catch(err) {
+    console.error('Error generando PDF:', err);
+    alert('No se pudo generar el PDF. Inténtalo de nuevo.');
   } finally {
-    btn.style.display = '';
+    btn.textContent = '↓ Descargar certificado en PDF';
+    btn.disabled = false;
     gallery.style.display = prevGallery;
     if(nav) nav.style.display = '';
   }
