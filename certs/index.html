@@ -317,7 +317,8 @@ async function exportPDF() {
     const heroW    = heroWrap.offsetWidth  * scale;
     const heroH    = heroWrap.offsetHeight * scale;
 
-    // Cargar imagen via fetch → blob (evita CORS en Safari)
+    btn.textContent = 'Cargando imagen...';
+
     let heroBitmap;
     try {
       const resp = await fetch(heroImg.src);
@@ -327,7 +328,8 @@ async function exportPDF() {
       heroBitmap = heroImg;
     }
 
-    // Hero canvas con object-fit: cover manual
+    btn.textContent = 'Dibujando hero...';
+
     const heroCanvas = document.createElement('canvas');
     heroCanvas.width  = heroW;
     heroCanvas.height = heroH;
@@ -347,14 +349,14 @@ async function exportPDF() {
       hCtx.drawImage(heroBitmap, dx, dy, dw, dh);
     }
 
-    // Gradiente overlay
     const grad = hCtx.createLinearGradient(0, heroH * 0.45, 0, heroH);
     grad.addColorStop(0, 'rgba(26,18,9,0)');
     grad.addColorStop(1, 'rgba(26,18,9,0.75)');
     hCtx.fillStyle = grad;
     hCtx.fillRect(0, 0, heroW, heroH);
 
-    // Card con html2canvas
+    btn.textContent = 'Capturando certificado...';
+
     const card = document.querySelector('.card');
     const cardCanvas = await html2canvas(card, {
       scale: 2,
@@ -364,7 +366,8 @@ async function exportPDF() {
       logging: false,
     });
 
-    // Canvas final combinado
+    btn.textContent = 'Generando PDF...';
+
     const finalCanvas = document.createElement('canvas');
     finalCanvas.width  = heroCanvas.width;
     finalCanvas.height = heroCanvas.height + cardCanvas.height;
@@ -374,7 +377,6 @@ async function exportPDF() {
     fCtx.drawImage(heroCanvas, 0, 0);
     fCtx.drawImage(cardCanvas, 0, heroCanvas.height);
 
-    // Generar PDF
     const imgData = finalCanvas.toDataURL('image/png');
     const { jsPDF } = window.jspdf;
     const pageW = 210, pageH = 297;
@@ -393,14 +395,13 @@ async function exportPDF() {
       }
     }
 
-    // Descarga compatible con todos los navegadores
+    btn.textContent = 'Descargando...';
+
     const pdfBlob = pdf.output('blob');
     const pdfUrl  = URL.createObjectURL(pdfBlob);
-
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
     if(isIOS) {
-      // iOS no soporta download en blobs — abrir en visor nativo
       window.location.href = pdfUrl;
     } else {
       const a = document.createElement('a');
@@ -413,8 +414,7 @@ async function exportPDF() {
     }
 
   } catch(err) {
-    console.error('Error generando PDF:', err);
-    alert('No se pudo generar el PDF. Inténtalo de nuevo.');
+    alert('Error: ' + err.message);
   } finally {
     btn.textContent = '↓ Descargar certificado en PDF';
     btn.disabled = false;
