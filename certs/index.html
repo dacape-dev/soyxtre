@@ -309,97 +309,96 @@ async function exportPDF() {
   gallery.style.display = 'none';
   if(nav) nav.style.display = 'none';
 
-  // Esperar imágenes
-  const imgs = document.getElementById('main').querySelectorAll('img');
-  await Promise.all([...imgs].map(img =>
-    img.complete ? Promise.resolve() :
-    new Promise(res => { img.onload = res; img.onerror = res; })
-  ));
+  try {
+    const heroImg  = document.getElementById('hero-img');
+    const heroWrap = document.querySelector('.hero-wrap');
+    const scale    = 2;
+    const heroW    = heroWrap.offsetWidth  * scale;
+    const heroH    = heroWrap.offsetHeight * scale;
 
-  // 1. Capturar el hero manualmente (respetando object-fit: cover)
-  const heroWrap = document.querySelector('.hero-wrap');
-  const heroImg  = document.getElementById('hero-img');
-  const heroW    = heroWrap.offsetWidth;
-  const heroH    = heroWrap.offsetHeight;
-  const scale    = 2;
-
-  const heroCanvas = document.createElement('canvas');
-  heroCanvas.width  = heroW * scale;
-  heroCanvas.height = heroH * scale;
-  const hCtx = heroCanvas.getContext('2d');
-
-  // Fondo oscuro
-  hCtx.fillStyle = 'rgba(196,144,90,0.07)';
-  hCtx.fillRect(0, 0, heroCanvas.width, heroCanvas.height);
-
-  // Dibujar con object-fit: cover
-  const iw = heroImg.naturalWidth;
-  const ih = heroImg.naturalHeight;
-  const cw = heroCanvas.width;
-  const ch = heroCanvas.height;
-  const ratio = Math.max(cw / iw, ch / ih);
-  const dw = iw * ratio;
-  const dh = ih * ratio;
-  const dx = (cw - dw) / 2;
-  const dy = (ch - dh) / 2;
-  hCtx.drawImage(heroImg, dx, dy, dw, dh);
-
-  // Gradiente overlay (igual que ::after)
-  const grad = hCtx.createLinearGradient(0, ch * 0.45, 0, ch);
-  grad.addColorStop(0, 'rgba(26,18,9,0)');
-  grad.addColorStop(1, 'rgba(26,18,9,0.75)');
-  hCtx.fillStyle = grad;
-  hCtx.fillRect(0, 0, cw, ch);
-
-  // 2. Capturar la card con html2canvas
-  const card = document.querySelector('.card');
-  const cardCanvas = await html2canvas(card, {
-    scale: 2,
-    useCORS: true,
-    allowTaint: false,
-    backgroundColor: '#f5f0e8',
-  });
-
-  // 3. Combinar hero + card en un canvas final
-  const totalH = heroCanvas.height + cardCanvas.height;
-  const finalCanvas = document.createElement('canvas');
-  finalCanvas.width  = heroCanvas.width;
-  finalCanvas.height = totalH;
-  const fCtx = finalCanvas.getContext('2d');
-
-  fCtx.fillStyle = '#1a1209';
-  fCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-  fCtx.drawImage(heroCanvas,  0, 0);
-  fCtx.drawImage(cardCanvas,  0, heroCanvas.height);
-
-  // Restaurar
-  btn.style.display = '';
-  gallery.style.display = prevGallery;
-  if(nav) nav.style.display = '';
-
-  // 4. Generar PDF
-  const imgData = finalCanvas.toDataURL('image/png');
-  const { jsPDF } = window.jspdf;
-
-  const pageW = 210;
-  const pageH = 297;
-  const imgW  = pageW;
-  const imgH  = (finalCanvas.height * pageW) / finalCanvas.width;
-
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-  if(imgH <= pageH) {
-    pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH);
-  } else {
-    let yOffset = 0;
-    while(yOffset < imgH) {
-      if(yOffset > 0) pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, -yOffset, imgW, imgH);
-      yOffset += pageH;
+    // Cargar imagen via fetch → blob → ImageBitmap (evita CORS en Safari)
+    let heroBitmap;
+    try {
+      const resp = await fetch(heroImg.src);
+      const blob = await resp.blob();
+      heroBitmap = await createImageBitmap(blob);
+    } catch(e) {
+      // Fallback: usar el elemento img directamente
+      heroBitmap = heroImg;
     }
-  }
 
-  pdf.save('certificado-soyxtre.pdf');
+    // Canvas del hero con object-fit: cover manual
+    const heroCanvas = document.createElement('canvas');
+    heroCanvas.width  = heroW;
+    heroCanvas.height = heroH;
+    const hCtx = heroCanvas.getContext('2d');
+
+    hCtx.fillStyle = '#1a1209';
+    hCtx.fillRect(0, 0, heroW, heroH);
+
+    const iw = heroBitmap.width  || heroBitmap.naturalWidth;
+    const ih = heroBitmap.height || heroBitmap.naturalHeight;
+    if(iw && ih) {
+      const ratio = Math.max(heroW / iw, heroH / ih);
+      const dw = iw * ratio;
+      const dh = ih * ratio;
+      const dx = (heroW - dw) / 2;
+      const dy = (heroH - dh) / 2;
+      hCtx.drawImage(heroBitmap, dx, dy, dw, dh);
+    }
+
+    // Gradiente overlay
+    const grad = hCtx.createLinearGradient(0, heroH * 0.45, 0, heroH);
+    grad.addColorStop(0, 'rgba(26,18,9,0)');
+    grad.addColorStop(1, 'rgba(26,18,9,0.75)');
+    hCtx.fillStyle = grad;
+    hCtx.fillRect(0, 0, heroW, heroH);
+
+    // Card con html2canvas
+    const card = document.querySelector('.card');
+    const cardCanvas = await html2canvas(card, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,   // necesario en Safari
+      backgroundColor: '#f5f0e8',
+      logging: false,
+    });
+
+    // Canvas final
+    const finalCanvas = document.createElement('canvas');
+    finalCanvas.width  = heroCanvas.width;
+    finalCanvas.height = heroCanvas.height + cardCanvas.height;
+    const fCtx = finalCanvas.getContext('2d');
+    fCtx.fillStyle = '#1a1209';
+    fCtx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+    fCtx.drawImage(heroCanvas, 0, 0);
+    fCtx.drawImage(cardCanvas, 0, heroCanvas.height);
+
+    const imgData = finalCanvas.toDataURL('image/png');
+    const { jsPDF } = window.jspdf;
+    const pageW = 210, pageH = 297;
+    const imgW  = pageW;
+    const imgH  = (finalCanvas.height * pageW) / finalCanvas.width;
+
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    if(imgH <= pageH) {
+      pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH);
+    } else {
+      let yOffset = 0;
+      while(yOffset < imgH) {
+        if(yOffset > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, -yOffset, imgW, imgH);
+        yOffset += pageH;
+      }
+    }
+
+    pdf.save('certificado-soyxtre.pdf');
+
+  } finally {
+    btn.style.display = '';
+    gallery.style.display = prevGallery;
+    if(nav) nav.style.display = '';
+  }
 }
 </script>
 </head>
