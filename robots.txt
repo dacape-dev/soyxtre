@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /certs/generator.html
+Disallow: /brand.html
+
+Sitemap: https://soyxtre.com/sitemap.xml

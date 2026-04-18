@@ -7,6 +7,51 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <title>soyXtre · Alfombras artesanales hechas a mano · Sevilla</title>
 <meta name="description" content="Alfombras personalizadas hechas a mano con técnica tufting en Sevilla. Cada pieza es única.">
+
+<!-- Schema.org structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "soyXtre",
+  "description": "Alfombras artesanales personalizadas hechas a mano con técnica tufting en Sevilla. Encargos a medida con certificado de autenticidad.",
+  "url": "https://soyxtre.com",
+  "email": "soyxtre@gmail.com",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Sevilla",
+    "addressCountry": "ES"
+  },
+  "sameAs": [
+    "https://www.instagram.com/soyxtre/",
+    "https://www.tiktok.com/@soyxtre",
+    "https://www.etsy.com/shop/soyxTre"
+  ],
+  "makesOffer": {
+    "@type": "Offer",
+    "itemOffered": {
+      "@type": "Service",
+      "name": "Alfombras tufting personalizadas a encargo",
+      "description": "Diseño y creación artesanal de alfombras tufting personalizadas. Cada pieza es única y viene con certificado de autenticidad. Envío a toda Europa."
+    }
+  }
+}
+</script>
+
+<!-- Open Graph -->
+<meta property="og:type"        content="website">
+<meta property="og:url"         content="https://soyxtre.com/">
+<meta property="og:title"       content="soyXtre · Alfombras artesanales hechas a mano · Sevilla">
+<meta property="og:description" content="Alfombras personalizadas hechas a mano con técnica tufting. Diseño a medida · Envío a toda Europa · Certificado de autenticidad.">
+<meta property="og:image"       content="https://soyxtre.com/logo/xtre2.png">
+<meta property="og:locale"      content="es_ES">
+<meta property="og:site_name"   content="soyXtre">
+
+<!-- Twitter / X Card -->
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="soyXtre · Alfombras artesanales hechas a mano · Sevilla">
+<meta name="twitter:description" content="Alfombras personalizadas hechas a mano con técnica tufting. Diseño a medida · Envío a toda Europa · Certificado de autenticidad.">
+<meta name="twitter:image"       content="https://soyxtre.com/logo/xtre2.png">
 <style>
 
 :root{
@@ -623,32 +668,44 @@ textarea.form-input{resize:vertical;min-height:120px;}
   }
 })();
 
-// ── Contact form (Formspree or mailto fallback) ───────────────────────────
+// ── Contact form via Formspree ────────────────────────────────────────────
 document.getElementById('contact-form').addEventListener('submit', function(e){
   e.preventDefault();
+  var btn    = this.querySelector('button[type="submit"]');
+  var status = document.getElementById('form-status');
   var name    = document.getElementById('cf-name').value.trim();
   var email   = document.getElementById('cf-email').value.trim();
   var subject = document.getElementById('cf-subject').value;
   var msg     = document.getElementById('cf-msg').value.trim();
 
-  // Option A: use Formspree — replace YOUR_FORM_ID
-  // fetch('https://formspree.io/f/YOUR_FORM_ID', {
-  //   method:'POST', headers:{'Content-Type':'application/json'},
-  //   body: JSON.stringify({name,email,subject,message:msg})
-  // }).then(...)
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
 
-  // Option B: mailto fallback (works without backend)
-  var body = encodeURIComponent(
-    'Nombre: ' + name + '\n' +
-    'Email: ' + email + '\n' +
-    'Tipo de pieza: ' + subject + '\n\n' +
-    msg
-  );
-  window.location.href = 'mailto:soyxtre@gmail.com?subject=Encargo soyXtre&body=' + body;
-
-  var status = document.getElementById('form-status');
-  status.classList.add('show');
-  setTimeout(function(){ status.classList.remove('show'); }, 3000);
+  fetch('https://formspree.io/f/xvzdrpje', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({ name: name, email: email, subject: subject, message: msg })
+  })
+  .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+  .then(function(res){
+    if(res.ok){
+      status.textContent = '✓ Mensaje enviado — te respondo pronto';
+      status.style.color = 'rgba(138,173,142,.9)';
+      document.getElementById('contact-form').reset();
+    } else {
+      throw new Error(res.data.error || 'Error');
+    }
+  })
+  .catch(function(){
+    status.textContent = '✗ No se pudo enviar — escríbeme a soyxtre@gmail.com';
+    status.style.color = 'rgba(200,100,100,.9)';
+  })
+  .finally(function(){
+    btn.disabled = false;
+    btn.textContent = 'Enviar mensaje';
+    status.classList.add('show');
+    setTimeout(function(){ status.classList.remove('show'); }, 5000);
+  });
 });
 </script>
 <script src="script.js"></script>
